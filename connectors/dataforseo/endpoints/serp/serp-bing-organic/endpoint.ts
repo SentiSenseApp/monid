@@ -49,13 +49,17 @@ export default defineEndpoint({
                 "results asked for (depth, or max_crawl_pages pages), " +
                 "billed per page of 10",
         },
-        estimate: ({ data }) => ({
-            counts: {
-                RESULT: Math.max(
-                    data.input.body.depth,
-                    (data.input.body.max_crawl_pages ?? 1) * 10,
-                ),
-            },
-        }),
+        // calculate_rectangles is billed one more page price
+        estimate: ({ data }) => {
+            const body = data.input.body;
+            const extras = body.calculate_rectangles ? 1 : 0;
+            return {
+                counts: {
+                    RESULT:
+                        Math.max(body.depth, (body.max_crawl_pages ?? 1) * 10) +
+                        extras * 10,
+                },
+            };
+        },
     },
 });

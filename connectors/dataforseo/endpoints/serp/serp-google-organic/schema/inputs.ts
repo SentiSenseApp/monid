@@ -72,9 +72,9 @@ export const zSerpGoogleOrganicBody = z.object({
         "How target must match: 'any' (default) or 'all' of find_targets_in elements.",
     ).optional(),
     find_targets_in: z.array(z.string().min(1)).describe(
-        "SERP element types to check for targets (values: organic, paid, local_pack, featured_snippet, events, google_flights, images, jobs, \u2026)",
+        "SERP element types to check for targets (values: organic, paid, local_pack, featured_snippet, events, google_flights, images, jobs, knowledge_graph, local_service, map, scholarly_articles, third_party_reviews, twitter)",
     ).optional(),
     ignore_targets_in: z.array(z.string().min(1)).describe(
-        "SERP element types to exclude from target search (values: organic, paid, local_pack, featured_snippet, events, google_flights, images, jobs, \u2026)",
+        "SERP element types to exclude from target search (values: organic, paid, local_pack, featured_snippet, events, google_flights, images, jobs, knowledge_graph, local_service, map, scholarly_articles, third_party_reviews, twitter)",
     ).optional(),
 }).strict();

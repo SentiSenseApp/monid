@@ -54,13 +54,23 @@ export default defineEndpoint({
                 "results asked for (depth, or max_crawl_pages pages), " +
                 "billed per page of 10",
         },
-        estimate: ({ data }) => ({
-            counts: {
-                RESULT: Math.max(
-                    data.input.body.depth,
-                    (data.input.body.max_crawl_pages ?? 1) * 10,
-                ),
-            },
-        }),
+        // calculate_rectangles and load_async_ai_overview are billed one
+        // more page price each; people_also_ask clicks ($0.00015 each,
+        // at most 4) fit inside one more page
+        estimate: ({ data }) => {
+            const body = data.input.body;
+            const extras = [
+                body.calculate_rectangles,
+                body.load_async_ai_overview,
+                body.people_also_ask_click_depth !== undefined,
+            ].filter(Boolean).length;
+            return {
+                counts: {
+                    RESULT:
+                        Math.max(body.depth, (body.max_crawl_pages ?? 1) * 10) +
+                        extras * 10,
+                },
+            };
+        },
     },
 });

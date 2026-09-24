@@ -15,6 +15,6 @@ export const zSerpGoogleFinanceMarketsBody = z.object({
         "Device operating system (values: windows)",
     ).optional(),
     market_type: z.string().min(1).describe(
-        "Type of google finance market (default most-active; values: most-active, indexes, indexes/americas, indexes/europe-middle-east-africa, \u2026)",
+        "Type of google finance market (default most-active; values: most-active, indexes, indexes/americas, indexes/europe-middle-east-africa, indexes/asia-pacific, gainers, losers, climate-leaders, cryptocurrencies, currencies)",
     ).optional(),
 }).strict();

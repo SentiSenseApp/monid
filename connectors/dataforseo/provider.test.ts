@@ -431,7 +431,7 @@ Deno.test("dataforseo docs: one Basic inject, one relay, one digest, one meter, 
     // the estimate texts: depth, YouTube's block_depth, depth × crawl pages
     // (per page size), crawl pages only, limit, one per array field, and the
     // fixed one row
-    assertEquals(estimates.size, 9);
+    assertEquals(estimates.size, 12);
 });
 
 Deno.test("dataforseo meta: the provider's envelope and blocked-field notes reach every doc; v1's pricing notes ride the docs that had them", async () => {
@@ -910,6 +910,131 @@ Deno.test("dataforseo floors: max_crawl_pages and block_depth take at least 1 �
     assertEquals(tenPages.credits, { default: 0.02 });
     await rejects(youtube, { body: { ...locale, block_depth: 0 } });
     await rejects(youtube, { body: { ...locale, depth: 20 } });
+});
+
+/** Every `describe()` text of a doc's compiled input schema. */
+const inputDescriptions = (schema: Record<string, unknown>): string[] =>
+    Object.values(schema).flatMap((part) =>
+        Object.values(
+            (part as { properties?: Record<string, { description?: string }> })
+                .properties ?? {},
+        ).flatMap((prop) => prop.description ?? [])
+    );
+
+Deno.test("dataforseo copy: parameter descriptions carry no scraped artifacts — glued defaults, dangling 'Note:', truncated value lists", async () => {
+    const bundle = await testBundle();
+    for (const id of await dataforseoIds()) {
+        for (const d of inputDescriptions(bundle.endpoints[id].input.schema)) {
+            assert(
+                !/default (?:true|false)[A-Za-z]|Note:\)|…/.test(d),
+                `${id}: ${d}`,
+            );
+        }
+    }
+});
+
+Deno.test("dataforseo copy: every filter or sort field the summary or description advertises exists in the schema", async () => {
+    const bundle = await testBundle();
+    for (const id of await dataforseoIds()) {
+        const doc = bundle.endpoints[id];
+        const body = doc.input.schema.body as
+            | { properties?: Record<string, unknown> }
+            | undefined;
+        if (body === undefined) continue; // dictionaries: the query is ours
+        const fields = new Set(Object.keys(body.properties ?? {}));
+        const filterFields = [...fields].filter((f) => f.endsWith("filters"));
+        const text = `${doc.meta.description} ${doc.meta.summary}`;
+        if (/\bfilters\b/.test(text)) {
+            assert(
+                filterFields.some((f) => text.includes(f)),
+                `${id} advertises filters it does not take`,
+            );
+        }
+        if (/\border_by\b/.test(text)) {
+            assert(fields.has("order_by"), `${id} advertises order_by`);
+        }
+        if (/\bsort(?:ed|ing)?\b/i.test(text)) {
+            assert(
+                fields.has("sort_by") || fields.has("order_by"),
+                `${id} advertises sorting it does not take`,
+            );
+        }
+    }
+});
+
+/** The vendor's priced switches (v1 `withSurcharges` / `onPageEstimate`). */
+const SURCHARGES: Record<string, Json> = {
+    calculate_rectangles: true,
+    load_async_ai_overview: true,
+    people_also_ask_click_depth: 4,
+    include_clickstream_data: true,
+    load_prices_by_dates: true,
+    enable_javascript: true,
+    load_resources: true,
+    enable_browser_rendering: true,
+};
+/** Flat (PER_CALL) cards: a count cannot raise their hold, so the extra
+ *  settles from the vendor's `cost` above it. */
+const FLAT_SURCHARGED = [
+    "dataforseo#google-hotels/info",
+    "dataforseo#onpage/content-parsing",
+    "dataforseo#onpage/instant-pages",
+    "dataforseo#serp/google-ai-mode",
+];
+
+Deno.test("dataforseo holds: every documented surcharge a metered doc takes raises its hold; google-organic and ranked-keywords at the vendor's rates", async () => {
+    const bundle = await testBundle();
+    const ids = await dataforseoIds();
+    const flat: string[] = [];
+    for (const id of ids) {
+        const body = bundle.endpoints[id].input.schema.body as
+            | { properties?: Record<string, unknown> }
+            | undefined;
+        const priced = Object.keys(body?.properties ?? {}).filter((f) =>
+            f in SURCHARGES
+        );
+        if (priced.length === 0) continue;
+        if (bundle.endpoints[id].usage.model.kind === "PER_CALL") {
+            flat.push(id);
+            continue;
+        }
+        const input = inputFor(id);
+        const base = await validates(id, input);
+        for (const field of priced) {
+            const on = await validates(id, {
+                ...input,
+                body: {
+                    ...(input.body as Record<string, Json>),
+                    [field]: SURCHARGES[field],
+                },
+            });
+            assert(
+                on.credits.default > base.credits.default,
+                `${id} ${field}: ${on.credits.default}`,
+            );
+        }
+    }
+    assertEquals(flat, FLAT_SURCHARGED.filter((id) => ids.includes(id)));
+    // google-organic: one page $0.002, each switch one more page price
+    const organic = "dataforseo#serp/google-organic";
+    const all = await validates(organic, {
+        body: {
+            keyword: "seo api",
+            calculate_rectangles: true,
+            load_async_ai_overview: true,
+            people_also_ask_click_depth: 1,
+        },
+    });
+    assertEquals(round6(all.credits.default), 0.008);
+    // ranked-keywords: clickstream doubles fee + rows
+    const ranked = await validates("dataforseo#labs/ranked-keywords", {
+        body: {
+            target: "dataforseo.com",
+            limit: 3,
+            include_clickstream_data: true,
+        },
+    });
+    assertEquals(round6(ranked.credits.default), 0.02472);
 });
 
 Deno.test("dataforseo gates: an omitted limit / depth holds the vendor's default page; the estimate holds pages × price or fee + rows × price", async () => {

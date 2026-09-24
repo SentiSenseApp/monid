@@ -17,9 +17,9 @@ export default defineEndpoint({
         description: "Google Dataset Search results for a keyword. Returns " +
             "datasets with rank, title, dataset_id, description, " +
             "provider, update date, formats, licence, and link. Supports " +
-            "depth, last_updated, file_type, usage_rights, and topic " +
-            "filters. Suited for finding open data for analysis. To find " +
-            "the location_code or exact location_name for a city or " +
+            "depth, last_updated, file_formats, usage_rights, is_free, " +
+            "and topics. Suited for finding open data for analysis. To " +
+            "find the location_code or exact location_name for a city or " +
             "country, call dataforseo#serp/google-locations (free lookup " +
             "of Google locations).",
         docsUrl:

@@ -71,7 +71,17 @@ receipt corrects a partial delivery (40106) while the fold flags it as
 `mismatch`. One generic provider `evidence` keys the count by the doc's
 own model (akta's shape). SERP add-ons (`load_async_ai_overview`,
 `people_also_ask_click_depth`, `calculate_rectangles`, clickstream ×2) are
-not separate lines: the receipt carries them, as in v1.
+not separate lines: the receipt carries them, as in v1. The HOLD includes
+them (v1 `withSurcharges`, !313 8f8a1771), expressed as counts since an
+estimate returns no dollars: a page-billed product adds one page per
+`calculate_rectangles` / `load_async_ai_overview` (the vendor's "+$0.002"
+is one live page price) and one page for any `people_also_ask_click_depth`
+($0.00015 a click, at most 4, fits in one page); a Labs product with
+`include_clickstream_data` holds twice the rows plus 100 rows (its base fee
+is exactly 100 rows at every Labs card). The four flat cards that take a
+priced switch (`serp/google-ai-mode`, `google-hotels/info`,
+`onpage/instant-pages`, `onpage/content-parsing`) cannot carry it as a
+count: their hold stays one call and the receipt settles above it.
 
 ## D5 — `limit` and `depth` stay optional; the binding carries the vendor's default
 

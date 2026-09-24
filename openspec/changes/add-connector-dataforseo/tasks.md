@@ -64,3 +64,9 @@
 - [ ] 6.6 `connectors/ids.lock.json` on main is already behind (bytedance,
       fundable, hunterio, litescrape ids); this change adds only its own
       ids — a full `ids:check --update` is a separate housekeeping commit.
+- [ ] 6.7 The four flat cards with a priced switch (`serp/google-ai-mode`
+      `calculate_rectangles`, `google-hotels/info` `load_prices_by_dates`
+      ×2, `onpage/instant-pages` and `onpage/content-parsing` rendering
+      switches up to ×34) hold one call; v1 holds the surcharge. A PER_CALL
+      estimate has no count to raise — needs a model change or an engine
+      dollar-hold (design D4).

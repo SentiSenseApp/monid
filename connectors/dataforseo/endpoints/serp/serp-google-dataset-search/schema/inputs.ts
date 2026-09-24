@@ -31,6 +31,6 @@ export const zSerpGoogleDatasetSearchBody = z.object({
         "Indicates whether displayed datasets are free (values: true, false)",
     ).optional(),
     topics: z.array(z.string().min(1)).describe(
-        "Dataset topics (values: humanities, social_sciences, life_sciences, agriculture, natural_sciences, geo, \u2026)",
+        "Dataset topics (values: humanities, social_sciences, life_sciences, agriculture, natural_sciences, geo, computer, architecture_and_urban_planning, engineering)",
     ).optional(),
 }).strict();

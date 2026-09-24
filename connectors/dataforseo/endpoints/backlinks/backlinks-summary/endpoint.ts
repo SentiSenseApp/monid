@@ -18,9 +18,10 @@ export default defineEndpoint({
             "broken links, dofollow vs nofollow counts, and breakdowns by " +
             "TLD, country, anchor type, platform, and link attribute. " +
             "Supports include_subdomains and backlinks_filters. Suited " +
-            "for a one-call link audit. To see which fields filters and " +
-            "order_by accept here, call dataforseo#backlinks/filters " +
-            "(free lookup of filterable fields per Backlinks endpoint).",
+            "for a one-call link audit. To see which fields " +
+            "backlinks_filters accepts here, call " +
+            "dataforseo#backlinks/filters (free lookup of filterable " +
+            "fields per Backlinks endpoint).",
         docsUrl: "https://docs.dataforseo.com/v3/backlinks/summary/live/",
         categories: ["seo"],
     },

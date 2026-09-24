@@ -69,6 +69,14 @@ given or defaulted knob.
 - **WHEN** `serp/google-organic` is estimated with `depth` 30
 - **THEN** the estimate holds 0.006 and promises `RESULT: 30`
 
+#### Scenario: holds include the documented surcharges
+- **WHEN** a metered product is estimated with a priced switch on
+  (`calculate_rectangles`, `load_async_ai_overview`,
+  `people_also_ask_click_depth`, `include_clickstream_data`)
+- **THEN** the hold rises by that switch — `serp/google-organic` with all
+  three SERP switches holds 0.008, `labs/ranked-keywords` with `limit` 3
+  and clickstream holds 2 × (0.012 + 3 × 0.00012)
+
 ### Requirement: Queued products poll task_get at high priority
 
 The 25 task-only products SHALL POST `task_post` with `priority: 2`,

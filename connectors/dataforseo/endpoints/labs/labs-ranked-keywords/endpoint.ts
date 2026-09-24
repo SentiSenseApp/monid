@@ -64,6 +64,15 @@ export default defineEndpoint({
                 },
             },
         },
-        estimate: ({ data }) => ({ counts: { rows: data.input.body.limit } }),
+        // include_clickstream_data doubles the call: the rows twice
+        // plus a second base fee, which is 100 rows at this card
+        estimate: ({ data }) => {
+            const calls = data.input.body.include_clickstream_data ? 2 : 1;
+            return {
+                counts: {
+                    rows: calls * data.input.body.limit + (calls - 1) * 100,
+                },
+            };
+        },
     },
 });

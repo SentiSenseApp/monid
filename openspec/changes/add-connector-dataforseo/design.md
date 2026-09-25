@@ -40,11 +40,14 @@ charged only for the pages returned) → success; anything else, including
 an absent verdict, → v1's synthesized class with `providerHttpStatus` 200
 — 40100 → 401, 40200 / 40210 → 402, 40104 / 40201 / 40203 / 40204 → 403,
 40102 / 40401 → 404, 40105 → 410, 40202 / 40205 / 40206 / 40209 → 429,
-405xx → 400, else 502. The status table is repeated in the four start / two
+405xx → 400, else 502 (40106 partial results is a success everywhere,
+lookups included). The status table is repeated in the five start / two
 poll texts because a closed term cannot share it; identical texts intern.
-Four starts cover the catalog: the provider's (141 POST products), the
-task_post (25), the filtering dictionary (36), the plain GET relay (13
-catalogues + the seller ad-link resolver).
+Five starts cover the catalog: the provider's (141 POST products), the
+task_post (25), the filtering dictionary (34), the app category lookup (2:
+the vendor answers one row of names, so search / limit apply to the names
+inside it), the plain GET relay (13 catalogues + the seller ad-link
+resolver).
 
 ## D4 — Billing: one USD pool, the receipt as the claim, four model shapes
 

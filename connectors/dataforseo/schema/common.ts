@@ -106,6 +106,40 @@ export const zTargets = (max: number) =>
 
 // ── Ours: the dictionary query and the task state ───────────────────────────
 
+/** One LLM Mentions target entity: a domain OR a keyword with its own
+ *  knobs (docs.dataforseo.com llm_mentions/search_mentions, 2026-09-25). */
+const zMentionsSearchFilter = z.string().min(1).describe(
+    "include (default) or exclude the matches.",
+).optional();
+export const zMentionsEntity = z.union([
+    z.object({
+        domain: z.string().min(1).max(63).describe(
+            "Target domain, without https:// and www.",
+        ),
+        search_filter: zMentionsSearchFilter,
+        search_scope: z.array(z.string().min(1)).describe(
+            "Where to match the domain (values: any, sources, search_results; default any).",
+        ).optional(),
+        include_subdomains: z.boolean().describe(
+            "Include the domain's subdomains (default false).",
+        ).optional(),
+    }).strict(),
+    z.object({
+        keyword: z.string().min(1).max(250).describe("Target keyword."),
+        search_filter: zMentionsSearchFilter,
+        search_scope: z.array(z.string().min(1)).describe(
+            "Where to match the keyword (values: any, question, answer, brand_entities, fan_out_queries; default any).",
+        ).optional(),
+        match_type: z.string().min(1).describe(
+            "How the keyword is matched (values: word_match, partial_match).",
+        ).optional(),
+    }).strict(),
+]);
+/** The `target` array of the LLM Mentions products: 1-10 entities. */
+export const zMentionsTarget = z.array(zMentionsEntity).min(1).max(10).describe(
+    "Target entities, 1-10: each {domain, ...} or {keyword, ...}; at least one must have search_filter include.",
+);
+
 /** Cap on a dictionary `limit`. */
 const DICTIONARY_MAX_LIMIT = 1000;
 

@@ -21,10 +21,10 @@ export const zSerpGoogleAdsSearchBody = z.object({
     format: z.string().min(1).describe(
         "Ad format (values: all, text, image, video)",
     ).optional(),
-    date_from: z.string().min(1).describe(
+    date_from: z.iso.date().describe(
         "Starting date of the time range",
     ).optional(),
-    date_to: z.string().min(1).describe(
+    date_to: z.iso.date().describe(
         "Ending date of the time range",
     ).optional(),
 }).strict();

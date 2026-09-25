@@ -31,7 +31,7 @@
     "serp/baidu-locations": {
         "queryParams": {
             "limit": 3,
-            "search": "united"
+            "search": "city"
         },
         "pathParams": {
             "country": "us"
@@ -48,7 +48,7 @@
     "serp/bing-locations": {
         "queryParams": {
             "limit": 3,
-            "search": "united"
+            "search": "city"
         },
         "pathParams": {
             "country": "us"
@@ -161,7 +161,7 @@
     "serp/google-locations": {
         "queryParams": {
             "limit": 3,
-            "search": "united"
+            "search": "city"
         },
         "pathParams": {
             "country": "us"
@@ -208,7 +208,7 @@
     "serp/seznam-locations": {
         "queryParams": {
             "limit": 3,
-            "search": "united"
+            "search": "city"
         },
         "pathParams": {
             "country": "us"
@@ -225,7 +225,7 @@
     "serp/yahoo-locations": {
         "queryParams": {
             "limit": 3,
-            "search": "united"
+            "search": "city"
         },
         "pathParams": {
             "country": "us"
@@ -250,7 +250,7 @@
     "serp/youtube-locations": {
         "queryParams": {
             "limit": 3,
-            "search": "united"
+            "search": "city"
         },
         "pathParams": {
             "country": "us"

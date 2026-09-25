@@ -19,8 +19,8 @@ export const zBacklinksSummaryBody = z.object({
     exclude_internal_backlinks: z.boolean().describe(
         "Indicates if internal backlinks from subdomains to the target will be excluded from the results (default true)",
     ).optional(),
-    internal_list_limit: z.number().int().max(1000).describe(
-        "Maximum number of elements within internal arrays (default 10 maximum value: 1000; max 1000)",
+    internal_list_limit: z.number().int().min(1).max(1000).describe(
+        "Maximum number of elements within internal arrays (1-1000, default 10)",
     ).optional(),
     backlinks_status_type: z.string().min(1).describe(
         "Set what backlinks to return and count (default live; values: all)",

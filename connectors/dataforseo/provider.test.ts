@@ -118,6 +118,18 @@ const wire = async (id: string, input: RunInput, body: Json) => {
 
 const round6 = (n: number) => Math.round(n * 1e6) / 1e6;
 
+type Prop = { description?: string; default?: Json };
+/** A compiled input part's fields: its own `properties`, or those of its
+ *  `anyOf` arms merged (an "at least one of" body is a union of
+ *  `.required` arms over the same fields). */
+const propsOf = (part: unknown): Record<string, Prop> => {
+    const p = part as
+        | { properties?: Record<string, Prop>; anyOf?: unknown[] }
+        | undefined;
+    if (p?.properties !== undefined) return p.properties;
+    return Object.assign({}, ...(p?.anyOf ?? []).map(propsOf));
+};
+
 /**
  * The account's price list (`GET /v3/appendix/user_data` `price`,
  * 2026-09-18, confirmed by receipts the same day — v1 `mod.test.ts`),
@@ -239,6 +251,19 @@ Deno.test("dataforseo docs: every endpoint is in the rate table", async () => {
     assertEquals(Object.keys(RATE).sort(), ids);
 });
 
+/** A page card's rate-line text names the count field the doc takes. */
+const pageText = (fields: Record<string, unknown>, every: number): string => {
+    if ("block_depth" in fields) {
+        return `results asked for (block_depth), billed per page of ${every}`;
+    }
+    if (!("depth" in fields)) {
+        return `pages asked for (max_crawl_pages), ${every} results each`;
+    }
+    return "max_crawl_pages" in fields
+        ? `results asked for (depth, or max_crawl_pages pages), billed per page of ${every}`
+        : `results asked for (depth), billed per page of ${every}`;
+};
+
 Deno.test("dataforseo docs: the card in the rate table is the doc's model", async () => {
     const bundle = await testBundle();
     for (const id of await dataforseoIds()) {
@@ -261,9 +286,10 @@ Deno.test("dataforseo docs: the card in the rate table is the doc's model", asyn
                     every: c.every,
                     consumes: { credit: "default", amount: c.amount },
                     label: "results requested",
-                    description:
-                        "results asked for (depth, or max_crawl_pages pages), " +
-                        `billed per page of ${c.every}`,
+                    description: pageText(
+                        propsOf(bundle.endpoints[id].input.schema.body),
+                        c.every,
+                    ),
                 }, id);
                 break;
             case "rows":
@@ -407,8 +433,9 @@ Deno.test("dataforseo docs: one Basic inject, one relay, one digest, one meter, 
             id,
         );
     }
-    // four start texts: the provider's live relay (POST products), the
-    // queued task_post, the filtering dictionary, the plain GET relay
+    // five start texts: the provider's live relay (POST products), the
+    // queued task_post, the filtering dictionary, the app category lookup
+    // (names inside one row), the plain GET relay
     assertEquals(starts.size, 4);
     const byProvenance = [...starts.entries()].map(([key, docs]) =>
         [
@@ -483,7 +510,7 @@ Deno.test("dataforseo schemas: strict mirrors, the vendor's default on limit / d
     for (const id of await dataforseoIds()) {
         const schema = bundle.endpoints[id].input.schema;
         for (const part of Object.values(schema) as Obj[]) {
-            for (const [name, prop] of Object.entries(part.properties)) {
+            for (const [name, prop] of Object.entries(propsOf(part))) {
                 assert(prop.description, `${id} ${name}: describe survived`);
                 if (prop.default !== undefined) {
                     assert(
@@ -516,6 +543,24 @@ Deno.test("dataforseo schemas: strict mirrors, the vendor's default on limit / d
 // the 216 relays
 // ---------------------------------------------------------------------------
 
+/**
+ * What each lookup's happy run keeps, pinned by position (not re-derived
+ * from the filter): location lists search 'city' and keep the three City
+ * rows at 1, 2, 5; the other row lookups interleave their four matches
+ * with two misses and keep 1, 3, 4 (limit 3 cuts the fourth); the two app
+ * category lookups keep three names inside their single row.
+ */
+const keptRows = (id: string, rows: unknown[]): unknown[] => {
+    if (id === "dataforseo#app-store/categories") {
+        return [{ categories: ["Games", "Games: Puzzle", "Games: Strategy"] }];
+    }
+    if (id === "dataforseo#google-play/categories") {
+        return [{ categories: ["Game", "Game: Puzzle", "Game: Strategy"] }];
+    }
+    const at = id.includes("locations") ? [1, 2, 5] : [1, 3, 4];
+    return at.map((i) => rows[i]);
+};
+
 Deno.test("dataforseo: every endpoint's happy run settles at the receipt, the fold agrees, and the caller gets tasks[0].result", async () => {
     for (const id of await dataforseoIds()) {
         const fixture = await fixtureFor(id, "synthetic-happy");
@@ -532,20 +577,9 @@ Deno.test("dataforseo: every endpoint's happy run settles at the receipt, the fo
             tasks: { result: unknown[] }[];
         };
         assert(Array.isArray(result.output), id);
-        const query = inputFor(id).queryParams as
-            | { search?: string; limit?: number }
-            | undefined;
-        if (query?.search !== undefined) {
-            // the dictionary start keeps the rows containing `search`
-            // (case-insensitive, anywhere in the row), cut at `limit`
-            const search = query.search.toLowerCase();
-            const expected = last.tasks[0].result
-                .filter((row) =>
-                    JSON.stringify(row).toLowerCase().includes(search)
-                )
-                .slice(0, query.limit);
-            assert(expected.length > 0, id);
-            assertEquals(result.output, expected, id);
+        if (inputFor(id).queryParams?.search !== undefined) {
+            const rows = last.tasks[0].result;
+            assertEquals(result.output, keptRows(id, rows), id);
         } else {
             assertEquals(result.output, last.tasks[0].result, id);
         }
@@ -909,10 +943,8 @@ Deno.test("dataforseo floors: max_crawl_pages and block_depth take at least 1 �
     const bundle = await testBundle();
     let seen = 0;
     for (const id of await dataforseoIds()) {
-        const body = bundle.endpoints[id].input.schema.body as
-            | { properties?: Record<string, unknown> }
-            | undefined;
-        if (body?.properties?.max_crawl_pages === undefined) continue;
+        const body = bundle.endpoints[id].input.schema.body;
+        if (propsOf(body).max_crawl_pages === undefined) continue;
         seen++;
         const input = inputFor(id);
         const withPages = (max_crawl_pages: number) => ({
@@ -943,14 +975,12 @@ Deno.test("dataforseo floors: max_crawl_pages and block_depth take at least 1 �
 Deno.test("dataforseo copy: parameter descriptions carry no scraped artifacts — glued defaults, dangling 'Note:', truncated value lists", async () => {
     const bundle = await testBundle();
     for (const id of await dataforseoIds()) {
-        const parts = Object.values(bundle.endpoints[id].input.schema) as {
-            properties?: Record<string, { description?: string }>;
-        }[];
-        const descriptions = parts.flatMap((part) =>
-            Object.values(part.properties ?? {}).flatMap((prop) =>
-                prop.description ?? []
-            )
-        );
+        const descriptions = Object.values(bundle.endpoints[id].input.schema)
+            .flatMap((part) =>
+                Object.values(propsOf(part)).flatMap((prop) =>
+                    prop.description ?? []
+                )
+            );
         for (const d of descriptions) {
             assert(
                 !/default (?:true|false)[A-Za-z]|Note:\)|…/.test(d),
@@ -964,11 +994,9 @@ Deno.test("dataforseo copy: every filter or sort field the summary or descriptio
     const bundle = await testBundle();
     for (const id of await dataforseoIds()) {
         const doc = bundle.endpoints[id];
-        const body = doc.input.schema.body as
-            | { properties?: Record<string, unknown> }
-            | undefined;
+        const body = doc.input.schema.body;
         if (body === undefined) continue; // dictionaries: the query is ours
-        const fields = new Set(Object.keys(body.properties ?? {}));
+        const fields = new Set(Object.keys(propsOf(body)));
         const filterFields = [...fields].filter((f) => f.endsWith("filters"));
         const text = `${doc.meta.description} ${doc.meta.summary}`;
         if (/\bfilters\b/.test(text)) {
@@ -1014,10 +1042,8 @@ Deno.test("dataforseo holds: every documented surcharge a metered doc takes rais
     const ids = await dataforseoIds();
     const flat: string[] = [];
     for (const id of ids) {
-        const body = bundle.endpoints[id].input.schema.body as
-            | { properties?: Record<string, unknown> }
-            | undefined;
-        const priced = Object.keys(body?.properties ?? {}).filter((f) =>
+        const body = bundle.endpoints[id].input.schema.body;
+        const priced = Object.keys(propsOf(body)).filter((f) =>
             f in SURCHARGES
         );
         if (priced.length === 0) continue;
@@ -1077,6 +1103,47 @@ Deno.test("dataforseo holds: every documented surcharge a metered doc takes rais
         body: { keyword: "seo api", depth: 15, calculate_rectangles: true },
     });
     assertEquals(round6(seznam.credits.default), 0.0048);
+});
+
+/** The docs whose vendor contract needs one of several identifiers. */
+const AT_LEAST_ONE = [
+    "dataforseo#domain/domains-by-technology",
+    "dataforseo#domain/technologies-summary",
+    "dataforseo#google-business/extended-reviews",
+    "dataforseo#google-business/reviews",
+    "dataforseo#google-shopping/product-info",
+    "dataforseo#google-shopping/sellers",
+    "dataforseo#tripadvisor/reviews",
+];
+
+Deno.test("dataforseo gates: an 'at least one of' body passes with one identifier and is refused with none", async () => {
+    const bundle = await testBundle();
+    const ids = await dataforseoIds();
+    const unions: string[] = [];
+    for (const id of ids) {
+        const arms = (bundle.endpoints[id].input.schema.body as
+            | { anyOf?: { required?: string[] }[] }
+            | undefined)?.anyOf;
+        if (arms === undefined) continue;
+        unions.push(id);
+        const shared = arms.map((arm) => new Set(arm.required ?? []))
+            .reduce((a, b) => new Set([...a].filter((f) => b.has(f))));
+        const identifiers = new Set(
+            arms.flatMap((arm) => arm.required ?? []).filter((f) =>
+                !shared.has(f)
+            ),
+        );
+        assert(identifiers.size >= 2, id);
+        const input = inputFor(id);
+        await validates(id, input);
+        const body = Object.fromEntries(
+            Object.entries(input.body as Record<string, Json>).filter((
+                [f],
+            ) => !identifiers.has(f)),
+        );
+        await rejects(id, { ...input, body });
+    }
+    assertEquals(unions, AT_LEAST_ONE.filter((id) => ids.includes(id)));
 });
 
 Deno.test("dataforseo gates: an omitted limit / depth holds the vendor's default page; the estimate holds pages × price or fee + rows × price", async () => {

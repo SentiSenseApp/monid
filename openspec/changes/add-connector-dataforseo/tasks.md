@@ -17,7 +17,8 @@
 - [x] 2.2 25 queued products — own `start` (task_post, priority 2, state
       `postCost`) + `poll` (task_get / task_get advanced), 30 min / 10 s.
 - [x] 2.3 36 row dictionaries (search / limit in start, 15 with a country
-      path) + 13 whole-object catalogues + the seller ad-link GET.
+      path; the two app category lists filter the names inside their one
+      row) + 13 whole-object catalogues + the seller ad-link GET.
 - [x] 2.4 The four LLM response docs pin `max_output_tokens: 1024` under
       the caller's fields in `toRequest`.
 - [x] 2.5 `connectors/categories.ts` — `image-search`, `video-search`,
@@ -26,8 +27,8 @@
 ## 3. Tests and fixtures
 
 - [x] 3.1 `provider.test.ts` — literal rate table (216 cards), model per
-      card, provenance (1 inject / relay / digest / meter / evidence, 4
-      starts, 2 polls, 14 estimates), meta, schemas, happy replay for every
+      card, provenance (1 inject / relay / digest / meter / evidence, 5
+      starts, 2 polls, 21 estimates), meta, schemas, happy replay for every
       endpoint, wire shape (one-task array, Basic header, priority 2, LLM
       cap, dictionary path), UTF-8 credentials, empties, items_count,
       40106, the in-band verdicts, the queued chain, strict + blocked

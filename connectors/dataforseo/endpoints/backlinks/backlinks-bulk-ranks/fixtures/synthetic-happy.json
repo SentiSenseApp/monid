@@ -50,19 +50,16 @@
                                     "items_count": 3,
                                     "items": [
                                         {
-                                            "keyword": "seo api 1",
-                                            "rank_absolute": 1,
-                                            "search_volume": 1000
+                                            "target": "dataforseo.com",
+                                            "rank": 392
                                         },
                                         {
-                                            "keyword": "seo api 2",
-                                            "rank_absolute": 2,
-                                            "search_volume": 999
+                                            "target": "ahrefs.com",
+                                            "rank": 611
                                         },
                                         {
-                                            "keyword": "seo api 3",
-                                            "rank_absolute": 3,
-                                            "search_volume": 998
+                                            "target": "semrush.com",
+                                            "rank": 598
                                         }
                                     ]
                                 }

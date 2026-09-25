@@ -49,8 +49,7 @@ export default defineEndpoint({
             consumes: { credit: "default", amount: 0.002 },
             label: "results requested",
             description:
-                "results asked for (depth, or max_crawl_pages pages), " +
-                "billed per page of 20",
+                "results asked for (block_depth), billed per page of 20",
         },
         estimate: ({ data }) => ({
             counts: { RESULT: data.input.body.block_depth },

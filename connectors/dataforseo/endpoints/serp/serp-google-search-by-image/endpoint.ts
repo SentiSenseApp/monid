@@ -179,9 +179,7 @@ export default defineEndpoint({
             every: 100,
             consumes: { credit: "default", amount: 0.0012 },
             label: "results requested",
-            description:
-                "results asked for (depth, or max_crawl_pages pages), " +
-                "billed per page of 100",
+            description: "pages asked for (max_crawl_pages), 100 results each",
         },
         // calculate_rectangles multiplies the task charge by 2
         estimate: ({ data }) => {

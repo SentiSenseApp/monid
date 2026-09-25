@@ -183,15 +183,12 @@ export default defineEndpoint({
                 "results asked for (depth, or max_crawl_pages pages), " +
                 "billed per page of 100",
         },
-        // calculate_rectangles is billed one more page price
+        // calculate_rectangles multiplies the task charge by 2
         estimate: ({ data }) => {
             const body = data.input.body;
-            const extras = body.calculate_rectangles ? 1 : 0;
-            return {
-                counts: {
-                    RESULT: ((body.max_crawl_pages ?? 1) + extras) * 100,
-                },
-            };
+            const pages = body.max_crawl_pages ?? 1;
+            const times = body.calculate_rectangles ? 2 : 1;
+            return { counts: { RESULT: pages * times * 100 } };
         },
     },
 });

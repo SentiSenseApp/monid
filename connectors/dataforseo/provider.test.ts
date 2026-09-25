@@ -431,7 +431,7 @@ Deno.test("dataforseo docs: one Basic inject, one relay, one digest, one meter, 
     // the estimate texts: depth, YouTube's block_depth, depth × crawl pages
     // (per page size), crawl pages only, limit, one per array field, and the
     // fixed one row
-    assertEquals(estimates.size, 12);
+    assertEquals(estimates.size, 13);
 });
 
 Deno.test("dataforseo meta: the provider's envelope and blocked-field notes reach every doc; v1's pricing notes ride the docs that had them", async () => {
@@ -912,19 +912,18 @@ Deno.test("dataforseo floors: max_crawl_pages and block_depth take at least 1 �
     await rejects(youtube, { body: { ...locale, depth: 20 } });
 });
 
-/** Every `describe()` text of a doc's compiled input schema. */
-const inputDescriptions = (schema: Record<string, unknown>): string[] =>
-    Object.values(schema).flatMap((part) =>
-        Object.values(
-            (part as { properties?: Record<string, { description?: string }> })
-                .properties ?? {},
-        ).flatMap((prop) => prop.description ?? [])
-    );
-
 Deno.test("dataforseo copy: parameter descriptions carry no scraped artifacts — glued defaults, dangling 'Note:', truncated value lists", async () => {
     const bundle = await testBundle();
     for (const id of await dataforseoIds()) {
-        for (const d of inputDescriptions(bundle.endpoints[id].input.schema)) {
+        const parts = Object.values(bundle.endpoints[id].input.schema) as {
+            properties?: Record<string, { description?: string }>;
+        }[];
+        const descriptions = parts.flatMap((part) =>
+            Object.values(part.properties ?? {}).flatMap((prop) =>
+                prop.description ?? []
+            )
+        );
+        for (const d of descriptions) {
             assert(
                 !/default (?:true|false)[A-Za-z]|Note:\)|…/.test(d),
                 `${id}: ${d}`,
@@ -1035,6 +1034,21 @@ Deno.test("dataforseo holds: every documented surcharge a metered doc takes rais
         },
     });
     assertEquals(round6(ranked.credits.default), 0.02472);
+    // calculate_rectangles doubles the whole task where the vendor says
+    // "multiplied by 2": 3 image pages hold 6, seznam depth 15 (2 pages)
+    // holds 4
+    const image = await validates("dataforseo#serp/google-search-by-image", {
+        body: {
+            image_url: "https://example.com/a.png",
+            max_crawl_pages: 3,
+            calculate_rectangles: true,
+        },
+    });
+    assertEquals(round6(image.credits.default), 0.0072);
+    const seznam = await validates("dataforseo#serp/seznam-organic", {
+        body: { keyword: "seo api", depth: 15, calculate_rectangles: true },
+    });
+    assertEquals(round6(seznam.credits.default), 0.0048);
 });
 
 Deno.test("dataforseo gates: an omitted limit / depth holds the vendor's default page; the estimate holds pages × price or fee + rows × price", async () => {

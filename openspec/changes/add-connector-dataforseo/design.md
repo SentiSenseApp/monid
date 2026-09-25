@@ -73,9 +73,13 @@ own model (akta's shape). SERP add-ons (`load_async_ai_overview`,
 `people_also_ask_click_depth`, `calculate_rectangles`, clickstream ×2) are
 not separate lines: the receipt carries them, as in v1. The HOLD includes
 them (v1 `withSurcharges`, !313 8f8a1771), expressed as counts since an
-estimate returns no dollars: a page-billed product adds one page per
-`calculate_rectangles` / `load_async_ai_overview` (the vendor's "+$0.002"
-is one live page price) and one page for any `people_also_ask_click_depth`
+estimate returns no dollars. `calculate_rectangles` is priced two ways by
+the vendor: Google and Bing organic say "charged extra $0.002" (one live
+page price — one more page), Google News, Search by Image, and Seznam say
+"the charge per task will be multiplied by 2" (the whole page count,
+rounded up to pages first, doubled — v1's one-extra-base under-holds these
+on multi-page requests). Google organic adds one page for
+`load_async_ai_overview` and one for any `people_also_ask_click_depth`
 ($0.00015 a click, at most 4, fits in one page); a Labs product with
 `include_clickstream_data` holds twice the rows plus 100 rows (its base fee
 is exactly 100 rows at every Labs card). The four flat cards that take a

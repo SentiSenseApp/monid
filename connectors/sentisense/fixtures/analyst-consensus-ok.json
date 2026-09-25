@@ -1,0 +1,39 @@
+{
+    "name": "analyst-consensus-ok",
+    "description": "Recorded 2026-09-24: NVDA analyst consensus in the preview envelope on a full-access key. One request.",
+    "calls": [
+        {
+            "req": {
+                "method": "GET",
+                "url": "https://app.sentisense.ai/api/v1/analyst/NVDA/consensus"
+            },
+            "res": {
+                "status": 200,
+                "body": {
+                    "isPreview": false,
+                    "previewReason": null,
+                    "data": {
+                        "ticker": "NVDA",
+                        "companyName": "NVIDIA Corporation",
+                        "currentPrice": 225.51,
+                        "targetLow": 180,
+                        "targetMean": 327.7,
+                        "targetMedian": 315,
+                        "targetHigh": 515,
+                        "numberOfAnalysts": 59,
+                        "upsidePercent": 45.32,
+                        "recommendationMean": 1.3,
+                        "strongBuy": 10,
+                        "buy": 48,
+                        "hold": 2,
+                        "sell": 1,
+                        "strongSell": 0,
+                        "consensusLabel": "STRONG_BUY",
+                        "updatedAt": "2026-09-24T12:47:25Z",
+                        "updatedAtEpoch": 1790254045
+                    }
+                }
+            }
+        }
+    ]
+}

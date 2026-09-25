@@ -1,0 +1,41 @@
+{
+    "name": "stock-quote-ok",
+    "description": "Recorded 2026-09-24: NVDA quote, a flat object (null fields omitted by the API). One request.",
+    "calls": [
+        {
+            "req": {
+                "method": "GET",
+                "url": "https://app.sentisense.ai/api/v1/stocks/NVDA/quote"
+            },
+            "res": {
+                "status": 200,
+                "body": {
+                    "ticker": "NVDA",
+                    "currentPrice": 224.58,
+                    "change": -0.9299999999999784,
+                    "changePercent": -0.41239856325660873,
+                    "volume": 77469857,
+                    "open": 222.08,
+                    "dayHigh": 224.94,
+                    "dayLow": 221.09,
+                    "previousClose": 225.51,
+                    "week52High": 236.54,
+                    "week52Low": 164.27,
+                    "marketCap": 5445389970000,
+                    "peRatio": 28.391908975979778,
+                    "epsTTM": 7.909999999999999,
+                    "dividendYield": 0.0023154332531837205,
+                    "movingAverage200Day": 199.27565000000007,
+                    "timestamp": 1790315953075,
+                    "extendedHours": {
+                        "session": "post",
+                        "price": 223.82,
+                        "change": -0.7600000000000193,
+                        "changePercent": -0.33840947546532163
+                    },
+                    "reportedCurrency": "USD"
+                }
+            }
+        }
+    ]
+}

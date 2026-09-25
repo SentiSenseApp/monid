@@ -48,7 +48,7 @@ export default defineEndpoint({
                 res.body,
                 "$.tasks[0].status_code",
             ) ?? utils.json.optionalNum(res.body, "$.status_code");
-            if (code !== 20000) {
+            if (code !== 20000 && code !== 40106) {
                 logger.warn(
                     "dataforseo envelope error — synthesizing a status",
                     {

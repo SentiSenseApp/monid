@@ -532,17 +532,20 @@ Deno.test("dataforseo: every endpoint's happy run settles at the receipt, the fo
             tasks: { result: unknown[] }[];
         };
         assert(Array.isArray(result.output), id);
-        if (inputFor(id).queryParams?.search !== undefined) {
-            // the dictionary start filtered six rows to the three 'united'
-            // ones within limit 3
-            const rows = result.output as { location_name: string }[];
-            assertEquals(rows.length, 3, id);
-            for (const row of rows) {
-                assert(
-                    JSON.stringify(row).toLowerCase().includes("united"),
-                    id,
-                );
-            }
+        const query = inputFor(id).queryParams as
+            | { search?: string; limit?: number }
+            | undefined;
+        if (query?.search !== undefined) {
+            // the dictionary start keeps the rows containing `search`
+            // (case-insensitive, anywhere in the row), cut at `limit`
+            const search = query.search.toLowerCase();
+            const expected = last.tasks[0].result
+                .filter((row) =>
+                    JSON.stringify(row).toLowerCase().includes(search)
+                )
+                .slice(0, query.limit);
+            assert(expected.length > 0, id);
+            assertEquals(result.output, expected, id);
         } else {
             assertEquals(result.output, last.tasks[0].result, id);
         }
@@ -716,6 +719,31 @@ Deno.test("dataforseo: an empty success still pays the page or the request fee; 
         fixture: await fixtureFor(locations, "synthetic-empty"),
     });
     assertEquals((whole.output as unknown[]).length, 6);
+});
+
+Deno.test("dataforseo: a GET lookup answering 40106 (partial results) is a success like 20000", async () => {
+    const bundle = await testBundle();
+    let seen = 0;
+    for (const id of await dataforseoIds()) {
+        if (bundle.endpoints[id].input.schema.body !== undefined) continue;
+        seen++;
+        const fixture = structuredClone(
+            await fixtureFor(id, "synthetic-happy"),
+        );
+        const body = fixture.calls[0].res.body as {
+            tasks: { status_code: number }[];
+        };
+        body.tasks[0].status_code = 40106;
+        const run = await runEndpoint({
+            unit: await testSealedUnit(id),
+            input: inputFor(id),
+            mode: "replay",
+            fixture,
+        });
+        assertEquals(run.httpStatus, 200, id);
+        assertEquals(run.isProviderError, false, id);
+    }
+    assert(seen > 0);
 });
 
 Deno.test("dataforseo: items_count stands in when items are not returned; 40106 partial results relay as success", async () => {

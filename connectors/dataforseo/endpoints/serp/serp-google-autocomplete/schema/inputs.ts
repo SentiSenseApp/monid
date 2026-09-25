@@ -13,8 +13,8 @@ export const zSerpGoogleAutocompleteBody = z.object({
         "Search query, up to 700 characters.",
     ),
     ...zLocaleFields,
-    cursor_pointer: z.number().int().describe(
-        "Search bar cursor pointer (default the number of)",
+    cursor_pointer: z.number().int().min(0).describe(
+        "Cursor position within the keyword, from 0 (default the end of the keyword)",
     ).optional(),
     client: z.string().min(1).describe(
         "Search client for autocomplete (values: chrome)",

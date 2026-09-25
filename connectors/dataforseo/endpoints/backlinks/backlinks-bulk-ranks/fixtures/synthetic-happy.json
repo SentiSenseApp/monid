@@ -10,7 +10,8 @@
                     {
                         "targets": [
                             "dataforseo.com",
-                            "ahrefs.com"
+                            "ahrefs.com",
+                            "semrush.com"
                         ]
                     }
                 ]

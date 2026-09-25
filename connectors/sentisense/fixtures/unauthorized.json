@@ -5,7 +5,7 @@
         {
             "req": {
                 "method": "GET",
-                "url": "https://app.sentisense.ai/api/v1/stocks/NVDA/quote"
+                "url": "https://app.sentisense.ai/api/v1/rating/NVDA"
             },
             "res": {
                 "status": 401,

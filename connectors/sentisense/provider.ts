@@ -3,8 +3,7 @@ import { defineProvider, presets, UsageModelKind } from "@shared/core";
 /**
  * SentiSense (sentisense.ai): US stock market data built for agents.
  * Sentiment, the SentiSense Score and Rating, insider, congressional and
- * 13F disclosures, analyst consensus, options positioning, the earnings
- * calendar, and AI-clustered news stories.
+ * 13F disclosures, options positioning, and AI-clustered news stories.
  *
  * Every endpoint is a synchronous GET against
  * `https://app.sentisense.ai/api/...` with the `X-SentiSense-API-Key`
@@ -13,10 +12,10 @@ import { defineProvider, presets, UsageModelKind } from "@shared/core";
  * inherits the provider sections below.
  *
  * BILLING. SentiSense meters in SentiSense credits, one pool, with three
- * flat per-call classes: LOOKUP 1 credit (quote, entity search, earnings
- * calendar, market mood: this provider default), ANALYTICS 2 credits
- * (sentiment, rating, stories, analyst consensus) and ALTERNATIVE DATA 4
- * credits (insider, congressional, 13F, options). The analytics and
+ * flat per-call classes: LOOKUP 1 credit (entity search, market mood:
+ * this provider default), ANALYTICS 2 credits (sentiment, rating,
+ * stories, insider trades, 13F holders) and ALTERNATIVE DATA 4 credits
+ * (insider cluster buys, congressional trades, options summary). The analytics and
  * alternative-data endpoints override the model with their own
  * PER_CALL amount. The API reports no per-response meter, so there is no
  * `consolidate`: the derived fold settles every run. The $/credit
@@ -34,16 +33,15 @@ export default defineProvider({
     meta: {
         displayName: "SentiSense",
         summary:
-            "US stock sentiment, ratings, insider, congressional and 13F trades, options and earnings data.",
+            "US stock sentiment, ratings, insider, congressional and 13F trades, options positioning and news.",
         description: "SentiSense is US stock market data for agents: " +
             "news and social sentiment per ticker with the SentiSense " +
             "Score, a daily A to F SentiSense Rating, a market-wide fear " +
             "to greed Market Mood index, AI-clustered news stories, " +
             "insider Form 4 trades and cluster buys, congressional STOCK " +
-            "Act trades, 13F institutional holders, Wall Street analyst " +
-            "consensus and price targets, end-of-day options positioning " +
-            "(IV rank, skew, put/call, open-interest walls, max pain), the " +
-            "earnings calendar, and stock quotes. The per-stock endpoints " +
+            "Act trades, 13F institutional holders, and end-of-day options " +
+            "positioning (IV rank, skew, put/call, open-interest walls, max " +
+            "pain). The per-stock endpoints " +
             "all take a plain ticker, and the market-wide ones return " +
             "tickers, so the output of one call feeds the next without a " +
             "lookup step; use entity search when all you have is a " +
@@ -54,9 +52,6 @@ export default defineProvider({
         notes: [
             "Coverage is US-listed stocks. Tickers are case-insensitive, " +
             "and dual-class spellings resolve (BRK.B and BRK-B both work).",
-            "The quote and analyst consensus endpoints refuse an ETF " +
-            "ticker with `error: ticker_is_etf` and a `seeInstead` list " +
-            "naming the ETF endpoint to use.",
             "An unknown ticker answers 404 with `error: " +
             "entity_not_found` and up to three `suggestions`; a tracked " +
             "ticker with no data for that endpoint answers 404 with " +
@@ -66,10 +61,10 @@ export default defineProvider({
             "returned a truncated preview; the full payload is in `data` " +
             "either way.",
             "Each successful call costs 1, 2 or 4 SentiSense credits by " +
-            "class: 1 for lookups (quote, entity search, earnings " +
-            "calendar, Market Mood), 2 for analytics (sentiment, Rating, " +
-            "stories, analyst consensus), 4 for alternative data " +
-            "(insider, congressional, 13F, options).",
+            "class: 1 for lookups (entity search, Market Mood), 2 for " +
+            "analytics (sentiment, Rating, stories, insider trades, 13F " +
+            "holders), 4 for alternative data (insider cluster buys, " +
+            "congressional trades, options summary).",
             "Data is informational and is not investment advice.",
         ],
     },

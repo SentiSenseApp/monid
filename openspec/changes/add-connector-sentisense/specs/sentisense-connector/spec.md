@@ -11,7 +11,7 @@ LOOKUP class), and an `output.fromError` that digests `{error, message, suggesti
 seeInstead?}` into `{message, code?, suggestions?, seeInstead?, raw}`.
 
 #### Scenario: A successful call settles at its class
-- **WHEN** any of the 14 endpoints returns 200
+- **WHEN** any of the 11 endpoints returns 200
 - **THEN** usage is `{credits: {default: N}, evidence: {CALL: 1}}` with no
   `mismatch`, where N is the endpoint's class, and the output is the
   response body unchanged
@@ -28,19 +28,17 @@ seeInstead?}` into `{message, code?, suggestions?, seeInstead?, raw}`.
 
 ### Requirement: Three per-call credit classes
 Each endpoint SHALL declare a flat PER_CALL model in its class: LOOKUP 1
-(`#v1/stocks/{ticker}/quote`, `#v1/kb/entities/search`,
-`#v1/calendar/earnings`, `#v2/market-mood`, inherited from the provider),
+(`#v1/kb/entities/search`, `#v2/market-mood`, inherited from the provider),
 ANALYTICS 2 (`#v1/stocks/{ticker}/sentiment`, `#v1/rating/{ticker}`,
 `#v1/documents/stories/ticker/{ticker}`, `#v1/documents/stories/search`,
-`#v1/analyst/{ticker}/consensus`) and ALTERNATIVE DATA 4
-(`#v1/insider/trades/{ticker}`, `#v1/insider/cluster-buys`,
-`#v1/politicians/filings/{ticker}`, `#v1/institutional/holders/{ticker}`,
-`#v1/stocks/{ticker}/options/summary`).
+`#v1/insider/trades/{ticker}`, `#v1/institutional/holders/{ticker}`) and
+ALTERNATIVE DATA 4 (`#v1/insider/cluster-buys`,
+`#v1/politicians/filings/{ticker}`, `#v1/stocks/{ticker}/options/summary`).
 
 #### Scenario: The class is the bill
-- **WHEN** `#v1/insider/trades/{ticker}` returns 200
-- **THEN** credits are `{default: 4}`; a quote settles at 1 and a sentiment
-  read at 2
+- **WHEN** `#v1/politicians/filings/{ticker}` returns 200
+- **THEN** credits are `{default: 4}`; an entity search settles at 1 and a
+  sentiment read at 2
 
 ### Requirement: Inputs mirror the documented params, strictly
 Every query-param mirror SHALL carry the documented params with optionality
@@ -57,14 +55,13 @@ SHALL be a strict object, because the API ignores unknown params.
 - **THEN** the run fails with `INVALID_INPUT` and no request is sent
 
 #### Scenario: Enums, dates and required text
-- **WHEN** entity search runs with `q: "n"` or an unknown `type`, the
-  earnings calendar with an unknown `time` or a non-ISO `from`, holders with
-  an unknown `sortBy`, or story search with an empty `query`
+- **WHEN** entity search runs with `q: "n"` or an unknown `type`, holders
+  with an unknown `sortBy`, or story search with an empty `query`
 - **THEN** the run fails with `INVALID_INPUT`
 
 ### Requirement: Shared fns intern
 The auth inject and the error digest SHALL intern to one fnTable entry each
-across the 14 docs.
+across the 11 docs.
 
 #### Scenario: One entry per shared fn
 - **WHEN** the bundle is compiled

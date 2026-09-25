@@ -38,11 +38,11 @@ export default defineEndpoint({
             queryParams: zInsiderTradesQueryParams,
         },
     },
-    /** Alternative-data class: 4 SentiSense credits per successful call. */
+    /** Analytics class: 2 SentiSense credits per successful call. */
     usage: {
         model: {
             kind: UsageModelKind.PER_CALL,
-            consumes: { credit: "default", amount: 4 },
+            consumes: { credit: "default", amount: 2 },
         },
     },
 });

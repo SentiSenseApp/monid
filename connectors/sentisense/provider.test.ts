@@ -25,11 +25,6 @@ const ENDPOINTS: Record<
     string,
     { fixture: string; credits: 1 | 2 | 4; input: RunInput }
 > = {
-    "sentisense#v1/stocks/{ticker}/quote": {
-        fixture: "stock-quote-ok",
-        credits: 1,
-        input: { pathParams: T },
-    },
     "sentisense#v1/stocks/{ticker}/sentiment": {
         fixture: "stock-sentiment-ok",
         credits: 2,
@@ -40,11 +35,6 @@ const ENDPOINTS: Record<
         credits: 2,
         input: { pathParams: T },
     },
-    "sentisense#v1/analyst/{ticker}/consensus": {
-        fixture: "analyst-consensus-ok",
-        credits: 2,
-        input: { pathParams: T },
-    },
     "sentisense#v1/stocks/{ticker}/options/summary": {
         fixture: "options-summary-ok",
         credits: 4,
@@ -52,7 +42,7 @@ const ENDPOINTS: Record<
     },
     "sentisense#v1/insider/trades/{ticker}": {
         fixture: "insider-trades-ok",
-        credits: 4,
+        credits: 2,
         input: { pathParams: T, queryParams: { lookbackDays: 30 } },
     },
     "sentisense#v1/insider/cluster-buys": {
@@ -67,7 +57,7 @@ const ENDPOINTS: Record<
     },
     "sentisense#v1/institutional/holders/{ticker}": {
         fixture: "institutional-holders-ok",
-        credits: 4,
+        credits: 2,
         input: { pathParams: T, queryParams: { limit: 3 } },
     },
     "sentisense#v2/market-mood": {
@@ -84,11 +74,6 @@ const ENDPOINTS: Record<
         fixture: "stories-search-ok",
         credits: 2,
         input: { queryParams: { query: "fed decision", limit: 2 } },
-    },
-    "sentisense#v1/calendar/earnings": {
-        fixture: "earnings-calendar-ok",
-        credits: 1,
-        input: { queryParams: { week: "next", time: "after_close" } },
     },
     "sentisense#v1/kb/entities/search": {
         fixture: "entity-search-ok",
@@ -228,7 +213,7 @@ Deno.test("sentisense input: lookbackDays is held to the API's 1..365", async ()
                 ...base,
                 queryParams: { lookbackDays: 365 },
             }),
-            charged(4),
+            charged(ENDPOINTS[id].credits),
         );
     }
 });
@@ -240,7 +225,7 @@ Deno.test("sentisense input: a misspelled param is refused instead of silently i
         pathParams: T,
         queryParams: { lookback: 30 },
     });
-    await rejects("sentisense#v1/stocks/{ticker}/quote", {
+    await rejects("sentisense#v1/rating/{ticker}", {
         pathParams: { ...T, exchange: "NASDAQ" },
     });
 });
@@ -252,12 +237,6 @@ Deno.test("sentisense input: enums, dates and required fields match the API's 40
     await rejects("sentisense#v1/kb/entities/search", {
         queryParams: { q: "nvidia", type: "stock" },
     });
-    await rejects("sentisense#v1/calendar/earnings", {
-        queryParams: { time: "after_hours" },
-    });
-    await rejects("sentisense#v1/calendar/earnings", {
-        queryParams: { from: "2026/09/28" },
-    });
     await rejects("sentisense#v1/institutional/holders/{ticker}", {
         pathParams: T,
         queryParams: { sortBy: "value" },
@@ -265,18 +244,17 @@ Deno.test("sentisense input: enums, dates and required fields match the API's 40
     await rejects("sentisense#v1/documents/stories/search", {
         queryParams: { query: "" },
     });
-    await rejects("sentisense#v1/stocks/{ticker}/quote", {
+    await rejects("sentisense#v1/rating/{ticker}", {
         pathParams: { ticker: "" },
     });
 });
 
 Deno.test({
-    name:
-        "sentisense#v1/stocks/{ticker}/quote live (gated on SENTISENSE_API_KEY)",
+    name: "sentisense#v1/rating/{ticker} live (gated on SENTISENSE_API_KEY)",
     ignore: liveSkip("sentisense"),
     fn: async () => {
         const result = await runEndpoint({
-            unit: await testSealedUnit("sentisense#v1/stocks/{ticker}/quote"),
+            unit: await testSealedUnit("sentisense#v1/rating/{ticker}"),
             input: { pathParams: { ticker: "AAPL" } },
             mode: "live",
         });
@@ -285,7 +263,7 @@ Deno.test({
             false,
             JSON.stringify(result.output),
         );
-        assertEquals(result.usage, charged(1));
+        assertEquals(result.usage, charged(2));
         assertEquals((result.output as Record<string, Json>).ticker, "AAPL");
     },
 });

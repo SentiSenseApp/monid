@@ -16,9 +16,8 @@ export default defineEndpoint({
             "source (news, X, Reddit, YouTube, Substack and more), the " +
             "stories driving the tone, peer tickers, and a short narrative " +
             "of why the Score sits where it does. The Score describes the " +
-            "conversation, not the price: pair it with " +
-            "sentisense#v1/stocks/{ticker}/quote for the move itself. For " +
-            "the market as a whole call sentisense#v2/market-mood.",
+            "conversation, not the price move. For the market as a whole " +
+            "call sentisense#v2/market-mood.",
         docsUrl: "https://sentisense.ai/docs/api/stocks",
         categories: ["stock-sentiment"],
         notes: [

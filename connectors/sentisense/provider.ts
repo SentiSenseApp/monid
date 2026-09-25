@@ -17,7 +17,10 @@ import { defineProvider, presets, UsageModelKind } from "@shared/core";
  * stories, insider trades, 13F holders) and ALTERNATIVE DATA 4 credits
  * (insider cluster buys, congressional trades, options summary). The analytics and
  * alternative-data endpoints override the model with their own
- * PER_CALL amount. The API reports no per-response meter, so there is no
+ * PER_CALL amount. Source of the amounts: SentiSense, the vendor, sets
+ * this card in this connector (2026-09-25); there is no public per-call
+ * price page, and the $/credit is agreed with the host. The API reports
+ * no per-response meter, so there is no
  * `consolidate`: the derived fold settles every run. The $/credit
  * conversion is the broker card's job. Non-2xx answers (an unknown
  * ticker, an invalid parameter, a bad key) are data and the engine
@@ -52,10 +55,13 @@ export default defineProvider({
         notes: [
             "Coverage is US-listed stocks. Tickers are case-insensitive, " +
             "and dual-class spellings resolve (BRK.B and BRK-B both work).",
-            "An unknown ticker answers 404 with `error: " +
-            "entity_not_found` and up to three `suggestions`; a tracked " +
-            "ticker with no data for that endpoint answers 404 with " +
-            "`error: no_coverage`. Both settle at zero.",
+            "An unknown or uncovered ticker is not always an error. " +
+            "Sentiment and Rating answer 404 (`entity_not_found` with up " +
+            "to three `suggestions`, or `no_coverage`), which settles at " +
+            "zero. The other per-ticker endpoints answer 200 with an empty " +
+            "result (the options summary with `data: null`), and every 200 " +
+            "bills at its class, so resolve a name with entity search " +
+            "before calling them.",
             "Several endpoints wrap their payload as `{isPreview, " +
             "previewReason, data}`. `isPreview: true` means the key's plan " +
             "returned a truncated preview; the full payload is in `data` " +

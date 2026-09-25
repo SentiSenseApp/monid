@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /** `GET /v1/institutional/holders/{ticker}` query parameters. */
 export const zHoldersQueryParams = z.strictObject({
-    reportDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe(
+    reportDate: z.iso.date().describe(
         "13F quarter-end date, `YYYY-MM-DD` (e.g. `2026-06-30`). The API " +
             "defaults to the latest settled quarter.",
     ).optional(),

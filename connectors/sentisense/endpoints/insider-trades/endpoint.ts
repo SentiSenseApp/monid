@@ -14,9 +14,9 @@ export default defineEndpoint({
             "simplified `transactionType` (BUY, SELL, EXERCISE, AWARD, " +
             "GIFT, OTHER), shares, price per share, total value, shares owned " +
             "afterwards, direct or indirect ownership, and whether the " +
-            "trade ran under a Rule 10b5-1 plan. Filter on " +
-            "`transactionCode` P for open-market buys, the signal most " +
-            "worth reading; awards and exercises are compensation, not " +
+            "trade ran under a Rule 10b5-1 plan. In the returned trades, " +
+            "rows with `transactionCode` P are open-market buys, the " +
+            "signal most worth reading; awards and exercises are compensation, not " +
             "conviction. For buys by three or more insiders across the " +
             "whole market call sentisense#v1/insider/cluster-buys.",
         docsUrl: "https://sentisense.ai/docs/api/insider-trading",

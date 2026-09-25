@@ -1,6 +1,6 @@
 {
     "name": "institutional-holders-ok",
-    "description": "Recorded 2026-09-24: NVDA 13F holders, first page of 3 (paging on, so notableChanges is present). One request.",
+    "description": "Recorded 2026-09-24: NVDA 13F holders, first page, trimmed to 2 holders with returnedCount to match (paging on, so notableChanges is present). One request.",
     "calls": [
         {
             "req": {
@@ -45,7 +45,7 @@
                                 "cikCount": null
                             }
                         ],
-                        "returnedCount": 3,
+                        "returnedCount": 2,
                         "offset": 0,
                         "notableChanges": {
                             "count": 1365,

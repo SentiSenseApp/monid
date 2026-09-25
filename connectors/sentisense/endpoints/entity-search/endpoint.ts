@@ -9,14 +9,14 @@ export default defineEndpoint({
             "Resolve a company name to its US ticker, or look up people, products and topics.",
         description: "Look up companies, ETFs, people, products, " +
             "organizations, countries and topics by name, best match " +
-            "first. Use it to turn a company name into the ticker every " +
-            "per-ticker endpoint takes: company and ETF matches carry " +
-            "`ticker`, while people, products and topics resolve with " +
-            "`ticker: null`. A company entry also says whether it can be " +
-            "queried by ticker (`listingCoverage`): `public_tracked` is a " +
-            "US listing the other endpoints accept, `public_untracked` is " +
-            "listed on a market not priced here (`listing` names it, e.g. " +
-            "`KRX: 005930`), and `private` is not listed.",
+            "first. Use it to turn a company name into the ticker the " +
+            "per-ticker endpoints take. Only a match with a non-null " +
+            "`ticker` can feed them: people, products and topics resolve " +
+            "with `ticker: null`, and so does a company whose " +
+            "`listingCoverage` is `public_untracked` (listed on a market " +
+            "not priced here; `listing` names it, e.g. `KRX: 005930`) or " +
+            "`private` (not listed). `public_tracked` companies carry the " +
+            "US ticker to use.",
         docsUrl: "https://sentisense.ai/docs/api/entities",
         categories: ["stock-market-data"],
     },
